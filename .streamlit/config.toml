@@ -1,6 +1,6 @@
 [theme]
 primaryColor = "#001dff"               # warna utama (tombol dan semacamnya)
-backgroundColor = "#fcfce8"            # warna background halaman 
+backgroundColor = "#fcf7fa"            # warna background halaman 
 secondaryBackgroundColor = "#ffffff"   # warna background sidebar
 textColor = "#004d40"                  # warna teks
 font = "sans serif"                    # font/jenis teks 
