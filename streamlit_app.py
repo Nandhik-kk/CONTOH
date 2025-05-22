@@ -1,990 +1,957 @@
+from streamlit_lottie import st_lottie
+import requests
 import streamlit as st
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from io import StringIO
+import numpy as np
+from PIL import Image
 
-# Mengatur konfigurasi halaman
+# fungsi lottie
+def load_lottieurl(url: str):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
+
+# Custom CSS untuk styling yang lebih menarik
+def load_css():
+    st.markdown("""
+    <style>
+    /* Import Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    /* Main container styling */
+    .main .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        max-width: 1200px;
+    }
+    
+    /* Header styling */
+    .header-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 3rem 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .header-container h1 {
+        color: white !important;
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .header-subtitle {
+        color: rgba(255,255,255,0.9) !important;
+        font-size: 1.2rem;
+        font-weight: 300;
+        margin-top: 1rem;
+    }
+    
+    /* Feature cards */
+    .feature-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        border: 1px solid #e1e5e9;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
+        text-align: center;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+    
+    .feature-title {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+    
+    .feature-description {
+        color: #6c757d;
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+    
+    /* Info sections */
+    .info-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 2rem;
+        border-radius: 15px;
+        margin: 2rem 0;
+        border-left: 5px solid #667eea;
+    }
+    
+    .info-section h3 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    
+    /* Sidebar styling */
+    .css-1d391kg {
+        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .css-1d391kg .css-1v0mbdj {
+        color: white;
+        font-weight: 600;
+    }
+    
+    /* Button styling */
+    .stButton > button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    /* Success/Info/Warning messages */
+    .stSuccess, .stInfo, .stWarning {
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    /* Number input styling */
+    .stNumberInput > div > div > input {
+        border-radius: 8px;
+        border: 2px solid #e1e5e9;
+        transition: border-color 0.3s ease;
+    }
+    
+    .stNumberInput > div > div > input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    /* Text input styling */
+    .stTextInput > div > div > input {
+        border-radius: 8px;
+        border: 2px solid #e1e5e9;
+        transition: border-color 0.3s ease;
+    }
+    
+    .stTextInput > div > div > input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    /* Footer */
+    .footer {
+        text-align: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        margin-top: 3rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    /* About page specific styling */
+    .about-hero {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        padding: 3rem 2rem;
+        border-radius: 20px;
+        text-align: center;
+        color: white;
+        margin-bottom: 2rem;
+    }
+    
+    .about-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        border-left: 5px solid #4facfe;
+    }
+    
+    .principle-item {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        border-left: 4px solid #28a745;
+    }
+    
+    .application-item {
+        background: #fff3cd;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        border-left: 4px solid #ffc107;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Pengaturan halaman
 st.set_page_config(
-    page_title="Kalkulator Spektroskopi",
+    page_title="Aplikasi Perhitungan Kadar Spektrofotometri UV-Vis",
+    page_icon="🧪",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Fungsi untuk menghitung konsentrasi berdasarkan hukum Lambert-Beer
-def hitung_konsentrasi(absorbansi, epsilon, panjang_sel):
-    return absorbansi / (epsilon * panjang_sel)
+# Load CSS
+load_css()
 
-# Fungsi untuk simulasi spektrum UV-Vis
-def generate_uv_vis_spectrum(wavelength_range, max_abs, peak_position, width):
-    spectrum = max_abs * np.exp(-((wavelength_range - peak_position) ** 2) / (2 * width ** 2))
-    return spectrum
-
-# Fungsi untuk simulasi spektrum IR
-def generate_ir_spectrum(wavenumber_range, peaks):
-    spectrum = np.zeros_like(wavenumber_range, dtype=float)
-    for peak_pos, intensity, width in peaks:
-        spectrum += intensity * np.exp(-((wavenumber_range - peak_pos) ** 2) / (2 * width ** 2))
-    return spectrum
-
-# Fungsi untuk simulasi spektrum Raman
-def generate_raman_spectrum(shift_range, peaks):
-    spectrum = np.zeros_like(shift_range, dtype=float)
-    for peak_pos, intensity, width in peaks:
-        lorentzian = intensity * (width**2 / ((shift_range - peak_pos)**2 + width**2))
-        spectrum += lorentzian
-    return spectrum
-
-# Judul utama halaman dengan styling
-st.markdown("""
-    <style>
-        .title {
-            font-size: 42px;
-            font-weight: bold;
-            color: #1E88E5;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .subtitle {
-            font-size: 24px;
-            color: #424242;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .section-header {
-            font-size: 28px;
-            font-weight: bold;
-            color: #0D47A1;
-            margin-top: 20px;
-            margin-bottom: 15px;
-        }
-    </style>
-    <div class="title">Kalkulator Spektroskopi</div>
-    <div class="subtitle">Aplikasi untuk Analisis dan Simulasi Data Spektroskopi</div>
-""", unsafe_allow_html=True)
-
-# Sidebar dengan menu yang lebih lengkap
-st.sidebar.markdown("<h2 style='text-align: center; color: #1E88E5;'>Menu Analisis</h2>", unsafe_allow_html=True)
-
-main_options = ["Beranda", "UV-Visible Spektroskopi", "Infrared (IR) Spektroskopi", "Raman Spektroskopi", "Tentang Aplikasi"]
-option = st.sidebar.selectbox("Pilih Metode Spektroskopi:", main_options)
-
-# Tambahkan info versi dan pengembang
-st.sidebar.markdown("---")
-st.sidebar.markdown("""
-    <div style='text-align: center; color: gray; font-size: 14px;'>
-        Versi 2.0<br>
-        © 2025 Lab Spektroskopi
+# Fungsi untuk setiap halaman
+def homepage():
+    # Header dengan gradient background
+    st.markdown("""
+    <div class="header-container">
+        <h1>🧪 Aplikasi Perhitungan Kadar Spektrofotometri UV-Vis</h1>
+        <p class="header-subtitle">Platform Digital untuk Analisis Kuantitatif dan Evaluasi Akurasi Metode Spektrofotometri</p>
     </div>
-""", unsafe_allow_html=True)
-
-# Konten utama berdasarkan pilihan sidebar
-if option == "Beranda":
-    st.markdown("<div class='section-header'>Selamat Datang di Kalkulator Spektroskopi</div>", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
     
-    st.write("""
-        Aplikasi ini menyediakan alat untuk melakukan perhitungan dan simulasi terkait dengan tiga teknik spektroskopi utama:
-        UV-Visible, Infrared (IR), dan Raman. Anda dapat menggunakan aplikasi ini untuk:
-    """)
-    
-    col1, col2, col3 = st.columns(3)
+    # Hero section dengan animasi dan penjelasan
+    col1, col2 = st.columns([1.2, 1])
     
     with col1:
         st.markdown("""
-            <div style='background-color: #E3F2FD; padding: 20px; border-radius: 10px; height: 250px;'>
-                <h3 style='color: #1976D2; text-align: center;'>UV-Visible</h3>
-                <ul>
-                    <li>Hitung konsentrasi sampel menggunakan hukum Lambert-Beer</li>
-                    <li>Simulasi spektrum UV-Vis</li>
-                    <li>Analisis data spektrum</li>
-                </ul>
-            </div>
+        <div class="info-section">
+            <h3>🔬 Tentang Spektrofotometri UV-Vis</h3>
+            <p style="text-align: justify; line-height: 1.8;">
+                Spektrofotometri UV-Vis adalah teknik analisis instrumental yang mengukur absorbansi cahaya 
+                oleh molekul pada rentang panjang gelombang ultraviolet (200-400 nm) dan cahaya tampak (400-800 nm). 
+                Teknik ini berdasarkan pada Hukum Lambert-Beer yang menyatakan hubungan linier antara absorbansi 
+                dengan konsentrasi larutan.
+            </p>
+            
+            <h4 style="color: #667eea; margin-top: 1.5rem;">🔧 Komponen Utama Instrumen:</h4>
+            <ul style="line-height: 1.8;">
+                <li><strong>Sumber Cahaya:</strong> Lampu deuterium (UV) dan tungsten (Vis)</li>
+                <li><strong>Monokromator:</strong> Memilih panjang gelombang spesifik</li>
+                <li><strong>Kuvet:</strong> Wadah sampel dengan jalur optik tetap</li>
+                <li><strong>Detektor:</strong> Mengkonversi sinyal cahaya menjadi data digital</li>
+            </ul>
+        </div>
         """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown("""
-            <div style='background-color: #E8F5E9; padding: 20px; border-radius: 10px; height: 250px;'>
-                <h3 style='color: #388E3C; text-align: center;'>Infrared (IR)</h3>
-                <ul>
-                    <li>Simulasi spektrum IR</li>
-                    <li>Identifikasi gugus fungsi</li>
-                    <li>Analisis data spektrum</li>
-                </ul>
-            </div>
-        """, unsafe_allow_html=True)
+        st.image(
+            "https://lsi.fleischhacker-asia.biz/wp-content/uploads/2022/05/Spektrofotometer-UV-VIS-Fungsi-Prinsip-Kerja-dan-Cara-Kerjanya.jpg", 
+            caption="🖼️ Spektrofotometer UV-Vis (Sumber: PT. Laboratorium Solusi Indonesia)", 
+            use_container_width=True
+        )
+        
+        # Tambahan info box
+        st.info("💡 **Prinsip Kerja:** Cahaya melewati sampel, sebagian diserap molekul, dan intensitas cahaya yang diteruskan diukur untuk menentukan konsentrasi.")
     
-    with col3:
-        st.markdown("""
-            <div style='background-color: #FFF3E0; padding: 20px; border-radius: 10px; height: 250px;'>
-                <h3 style='color: #E64A19; text-align: center;'>Raman</h3>
-                <ul>
-                    <li>Simulasi spektrum Raman</li>
-                    <li>Analisis puncak Raman</li>
-                    <li>Perbandingan data</li>
-                </ul>
-            </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("---")
+    # Section aplikasi dan manfaat
     st.markdown("""
-        ### Cara Menggunakan Aplikasi
-        1. Pilih jenis spektroskopi yang diinginkan dari menu di sidebar
-        2. Masukkan parameter sesuai kebutuhan
-        3. Lihat hasil perhitungan dan visualisasi
-    """)
-
-elif option == "UV-Visible Spektroskopi":
-    st.markdown("<div class='section-header'>UV-Visible Spektroskopi</div>", unsafe_allow_html=True)
-    
-    st.write("""
-        Spektroskopi UV-Vis adalah teknik analisis yang memanfaatkan interaksi sinar ultraviolet dan tampak dengan suatu sampel.
-        Metode ini digunakan untuk mengukur absorbansi atau transmitansi cahaya pada panjang gelombang tertentu,
-        sehingga dapat digunakan untuk menentukan konsentrasi zat terlarut menggunakan hukum Lambert-Beer.
-    """)
-    
-    tabs = st.tabs(["Kalkulator Konsentrasi", "Simulasi Spektrum", "Analisis Data"])
-    
-    with tabs[0]:
-        st.subheader("Kalkulator Konsentrasi (Hukum Lambert-Beer)")
-        st.latex(r"A = \varepsilon \cdot c \cdot l")
-        st.write("Keterangan:")
-        st.write("A = Absorbansi")
-        st.write("ε = Koefisien absorptivitas molar (L·mol⁻¹·cm⁻¹)")
-        st.write("c = Konsentrasi (mol/L)")
-        st.write("l = Panjang lintasan sel (cm)")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            absorbansi = st.number_input("Absorbansi (A)", min_value=0.0, max_value=3.0, value=0.5, step=0.01)
-            epsilon = st.number_input("Koefisien Absorptivitas Molar (ε) (L·mol⁻¹·cm⁻¹)", min_value=100.0, value=5000.0, step=100.0)
-            panjang_sel = st.number_input("Panjang Sel (l) (cm)", min_value=0.1, max_value=10.0, value=1.0, step=0.1)
-            
-            if st.button("Hitung Konsentrasi"):
-                konsentrasi = hitung_konsentrasi(absorbansi, epsilon, panjang_sel)
-                st.success(f"Konsentrasi sampel adalah {konsentrasi:.6f} mol/L atau {konsentrasi * 1000:.4f} mmol/L")
-        
-        with col2:
-            st.markdown("""
-                <div style='background-color: #E3F2FD; padding: 15px; border-radius: 10px;'>
-                    <h4 style='color: #1976D2;'>Tips Penggunaan</h4>
-                    <ul>
-                        <li>Pastikan nilai absorbansi antara 0.1-1.0 untuk hasil akurat</li>
-                        <li>Gunakan sel kuvet yang sesuai dengan sampel Anda</li>
-                        <li>Koefisien absorptivitas molar bervariasi untuk setiap senyawa</li>
-                    </ul>
-                </div>
-            """, unsafe_allow_html=True)
-    
-    with tabs[1]:
-        st.subheader("Simulasi Spektrum UV-Vis")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            min_wavelength = st.number_input("Panjang Gelombang Minimum (nm)", min_value=190, max_value=800, value=200, step=10)
-            max_wavelength = st.number_input("Panjang Gelombang Maksimum (nm)", min_value=200, max_value=800, value=700, step=10)
-            peak_position = st.slider("Posisi Puncak (nm)", min_value=200, max_value=700, value=350)
-            max_absorbance = st.slider("Absorbansi Maksimum", min_value=0.0, max_value=2.0, value=1.0, step=0.1)
-            peak_width = st.slider("Lebar Puncak", min_value=5, max_value=100, value=30)
-            
-            st.write("Tambahkan puncak kedua? (untuk campuran)")
-            add_second_peak = st.checkbox("Ya, tambahkan puncak kedua")
-            
-            peak2_position = None
-            peak2_absorbance = None
-            peak2_width = None
-            
-            if add_second_peak:
-                peak2_position = st.slider("Posisi Puncak Kedua (nm)", min_value=200, max_value=700, value=450)
-                peak2_absorbance = st.slider("Absorbansi Maksimum Kedua", min_value=0.0, max_value=2.0, value=0.7, step=0.1)
-                peak2_width = st.slider("Lebar Puncak Kedua", min_value=5, max_value=100, value=40)
-        
-        with col2:
-            wavelength_range = np.linspace(min_wavelength, max_wavelength, 1000)
-            spectrum = generate_uv_vis_spectrum(wavelength_range, max_absorbance, peak_position, peak_width)
-            
-            if add_second_peak and peak2_position is not None:
-                spectrum2 = generate_uv_vis_spectrum(wavelength_range, peak2_absorbance, peak2_position, peak2_width)
-                spectrum += spectrum2
-            
-            plt.figure(figsize=(10, 6))
-            plt.plot(wavelength_range, spectrum)
-            plt.title("Simulasi Spektrum UV-Vis")
-            plt.xlabel("Panjang Gelombang (nm)")
-            plt.ylabel("Absorbansi")
-            plt.grid(True, linestyle='--', alpha=0.7)
-            plt.fill_between(wavelength_range, spectrum, alpha=0.2)
-            plt.xlim(min_wavelength, max_wavelength)
-            plt.ylim(0, max(spectrum) * 1.1)
-            
-            # Anotasi puncak
-            peak_idx = np.argmax(spectrum)
-            plt.annotate(f"λmax = {wavelength_range[peak_idx]:.1f} nm",
-                        xy=(wavelength_range[peak_idx], spectrum[peak_idx]),
-                        xytext=(wavelength_range[peak_idx] + 20, spectrum[peak_idx] + 0.1),
-                        arrowprops=dict(arrowstyle="->", color="red"))
-            
-            st.pyplot(plt)
-            
-            # Opsi untuk mengunduh data
-            df_spectrum = pd.DataFrame({
-                'Wavelength (nm)': wavelength_range,
-                'Absorbance': spectrum
-            })
-            
-            csv = df_spectrum.to_csv(index=False)
-            st.download_button(
-                label="Unduh Data Spektrum (CSV)",
-                data=csv,
-                file_name="uv_vis_spectrum.csv",
-                mime="text/csv"
-            )
-    
-    with tabs[2]:
-        st.subheader("Analisis Data Spektrum UV-Vis")
-        st.write("Unggah file CSV dengan data spektrum UV-Vis untuk analisis")
-        
-        uploaded_file = st.file_uploader("Pilih file CSV", type=["csv"])
-        
-        if uploaded_file is not None:
-            try:
-                # Simulasi data jika file diunggah
-                stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
-                content = stringio.read()
-                
-                st.write("**Data spektrum berhasil diunggah!**")
-                
-                # Simulasi data untuk demo (akan digantikan dengan data sebenarnya)
-                wavelength = np.linspace(200, 700, 100)
-                absorbance = generate_uv_vis_spectrum(wavelength, 1.2, 350, 30) + generate_uv_vis_spectrum(wavelength, 0.8, 450, 40)
-                absorbance += np.random.normal(0, 0.02, size=len(wavelength))  # Menambahkan noise
-                
-                df = pd.DataFrame({
-                    'Wavelength (nm)': wavelength,
-                    'Absorbance': absorbance
-                })
-                
-                st.dataframe(df.head(10))
-                
-                # Visualisasi data
-                plt.figure(figsize=(10, 6))
-                plt.plot(df['Wavelength (nm)'], df['Absorbance'], 'b-')
-                plt.title("Data Spektrum UV-Vis")
-                plt.xlabel("Panjang Gelombang (nm)")
-                plt.ylabel("Absorbansi")
-                plt.grid(True, linestyle='--', alpha=0.7)
-                
-                # Temukan puncak-puncak
-                from scipy.signal import find_peaks
-                peaks, _ = find_peaks(df['Absorbance'], height=0.3, distance=20)
-                
-                plt.plot(df['Wavelength (nm)'].iloc[peaks], df['Absorbance'].iloc[peaks], "ro")
-                for i, peak in enumerate(peaks):
-                    plt.annotate(f"Peak {i+1}: {df['Wavelength (nm)'].iloc[peak]:.1f} nm",
-                                xy=(df['Wavelength (nm)'].iloc[peak], df['Absorbance'].iloc[peak]),
-                                xytext=(df['Wavelength (nm)'].iloc[peak] - 20, df['Absorbance'].iloc[peak] + 0.1),
-                                arrowprops=dict(arrowstyle="->", color="red"))
-                
-                st.pyplot(plt)
-                
-                # Hasil analisis
-                st.subheader("Hasil Analisis:")
-                
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    st.write(f"**Jumlah puncak terdeteksi:** {len(peaks)}")
-                    st.write("**Informasi Puncak:**")
-                    for i, peak in enumerate(peaks):
-                        st.write(f"Puncak {i+1}: {df['Wavelength (nm)'].iloc[peak]:.1f} nm (Abs: {df['Absorbance'].iloc[peak]:.3f})")
-                    
-                    max_abs_idx = df['Absorbance'].idxmax()
-                    st.write(f"**Absorbansi maksimum:** {df['Absorbance'].iloc[max_abs_idx]:.3f} pada {df['Wavelength (nm)'].iloc[max_abs_idx]:.1f} nm")
-                
-                with col2:
-                    st.markdown("""
-                        <div style='background-color: #E3F2FD; padding: 15px; border-radius: 10px;'>
-                            <h4 style='color: #1976D2;'>Interpretasi Awal</h4>
-                            <ul>
-                                <li>Puncak 1 (350 nm): Kemungkinan transisi π → π* dari ikatan rangkap terkonjugasi</li>
-                                <li>Puncak 2 (450 nm): Kemungkinan transisi n → π* dari gugus karbonil</li>
-                            </ul>
-                        </div>
-                    """, unsafe_allow_html=True)
-                    
-                    # Tambahkan opsi pengaturan analisis lanjutan
-                    st.write("**Pengaturan Analisis Lanjutan:**")
-                    threshold = st.slider("Threshold Deteksi Puncak", min_value=0.1, max_value=1.0, value=0.3, step=0.05)
-                    
-            except Exception as e:
-                st.error(f"Terjadi kesalahan saat memproses file: {e}")
-                st.write("Pastikan format file sesuai dengan yang diharapkan.")
-
-elif option == "Infrared (IR) Spektroskopi":
-    st.markdown("<div class='section-header'>Infrared (IR) Spektroskopi</div>", unsafe_allow_html=True)
-    
-    st.write("""
-        Spektroskopi Infrared (IR) adalah teknik untuk mempelajari getaran molekul yang disebabkan oleh penyerapan gelombang inframerah.
-        Setiap jenis ikatan kimia akan menyerap IR pada frekuensi khas, sehingga spektrum IR dapat digunakan untuk identifikasi gugus fungsi.
-    """)
-    
-    tabs = st.tabs(["Simulasi Spektrum IR", "Database Gugus Fungsi", "Interpretasi Spektrum"])
-    
-    with tabs[0]:
-        st.subheader("Simulasi Spektrum IR")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            min_wavenumber = st.number_input("Bilangan Gelombang Minimum (cm⁻¹)", min_value=400, max_value=4000, value=500, step=100)
-            max_wavenumber = st.number_input("Bilangan Gelombang Maksimum (cm⁻¹)", min_value=500, max_value=4000, value=4000, step=100)
-            
-            st.subheader("Tambahkan Puncak IR")
-            
-            num_peaks = st.slider("Jumlah Puncak", min_value=1, max_value=5, value=3)
-            
-            peaks = []
-            for i in range(num_peaks):
-                st.markdown(f"#### Puncak {i+1}")
-                col_a, col_b, col_c = st.columns(3)
-                with col_a:
-                    peak_pos = st.number_input(f"Posisi Puncak (cm⁻¹)", min_value=500, max_value=4000, value=1000 + i*800, step=50, key=f"pos_{i}")
-                with col_b:
-                    peak_int = st.slider(f"Intensitas", min_value=0.1, max_value=1.0, value=0.8 - i*0.2, step=0.1, key=f"int_{i}")
-                with col_c:
-                    peak_width = st.slider(f"Lebar", min_value=10, max_value=100, value=50, step=5, key=f"width_{i}")
-                
-                peaks.append((peak_pos, peak_int, peak_width))
-                
-                # Tampilkan informasi gugus fungsi yang mungkin
-                if 1650 <= peak_pos <= 1750:
-                    st.info("Kemungkinan gugus fungsi: C=O (Karbonil)")
-                elif 3200 <= peak_pos <= 3600:
-                    st.info("Kemungkinan gugus fungsi: O-H (Hidroksil)")
-                elif 2800 <= peak_pos <= 3000:
-                    st.info("Kemungkinan gugus fungsi: C-H (Alkana/Alkena)")
-                elif 1550 <= peak_pos <= 1650:
-                    st.info("Kemungkinan gugus fungsi: C=C (Alkena)")
-        
-        with col2:
-            wavenumber_range = np.linspace(min_wavenumber, max_wavenumber, 1000)
-            ir_spectrum = generate_ir_spectrum(wavenumber_range, peaks)
-            
-            plt.figure(figsize=(10, 6))
-            plt.plot(wavenumber_range, ir_spectrum)
-            plt.title("Simulasi Spektrum IR")
-            plt.xlabel("Bilangan Gelombang (cm⁻¹)")
-            plt.ylabel("Transmitansi (%)")
-            plt.grid(True, linestyle='--', alpha=0.7)
-            plt.ylim(0, 1.1)
-            plt.xlim(max_wavenumber, min_wavenumber)  # Inversi sumbu x untuk spektrum IR
-            
-            # Konversi ke transmitansi
-            transmittance = 1 - ir_spectrum
-            plt.plot(wavenumber_range, transmittance)
-            
-            # Anotasi puncak-puncak
-            for i, (peak_pos, peak_int, _) in enumerate(peaks):
-                peak_idx = np.abs(wavenumber_range - peak_pos).argmin()
-                plt.annotate(f"{peak_pos} cm⁻¹",
-                            xy=(wavenumber_range[peak_idx], transmittance[peak_idx]),
-                            xytext=(wavenumber_range[peak_idx] + 50, transmittance[peak_idx] - 0.1),
-                            arrowprops=dict(arrowstyle="->", color="red"))
-            
-            st.pyplot(plt)
-            
-            # Opsi untuk mengunduh data
-            df_spectrum = pd.DataFrame({
-                'Wavenumber (cm⁻¹)': wavenumber_range,
-                'Transmittance (%)': transmittance * 100
-            })
-            
-            csv = df_spectrum.to_csv(index=False)
-            st.download_button(
-                label="Unduh Data Spektrum (CSV)",
-                data=csv,
-                file_name="ir_spectrum.csv",
-                mime="text/csv"
-            )
-    
-    with tabs[1]:
-        st.subheader("Database Gugus Fungsi IR")
-        
-        st.write("""
-            Tabel di bawah ini berisi informasi tentang pita absorpsi inframerah yang khas untuk berbagai gugus fungsi.
-            Gunakan ini sebagai referensi untuk interpretasi data IR Anda.
-        """)
-        
-        # Buat dataframe contoh untuk database gugus fungsi
-        ir_data = {
-            'Gugus Fungsi': ['O-H (Alkohol, bebas)', 'O-H (Alkohol, berikatan H)', 'N-H (Amina primer)', 'C-H (Alkana)', 
-                            'C-H (Alkena)', 'C-H (Aromatik)', 'C≡N (Nitril)', 'C=O (Aldehida)', 'C=O (Keton)', 
-                            'C=O (Asam karboksilat)', 'C=O (Ester)', 'C=O (Amida)', 'C=C (Alkena)', 'C=C (Aromatik)'],
-            'Bilangan Gelombang (cm⁻¹)': ['3600-3650', '3200-3400', '3300-3500', '2850-2960', '3010-3100', '3000-3100', 
-                                        '2210-2260', '1720-1740', '1710-1720', '1700-1725', '1735-1750', '1630-1690', 
-                                        '1620-1680', '1450-1600'],
-            'Intensitas': ['Kuat, tajam', 'Kuat, lebar', 'Medium', 'Kuat', 'Medium', 'Lemah', 'Medium', 'Kuat', 'Kuat', 
-                        'Kuat', 'Kuat', 'Kuat', 'Medium-lemah', 'Medium-kuat'],
-            'Keterangan': ['Peregangan', 'Peregangan', 'Peregangan', 'Peregangan', 'Peregangan', 'Peregangan', 
-                        'Peregangan', 'Peregangan', 'Peregangan', 'Peregangan', 'Peregangan', 'Peregangan', 
-                        'Peregangan', 'Peregangan']
-        }
-        
-        df_ir = pd.DataFrame(ir_data)
-        
-        # Filter untuk pencarian
-        search_term = st.text_input("Cari Gugus Fungsi:", "")
-        
-        if search_term:
-            filtered_df = df_ir[df_ir['Gugus Fungsi'].str.contains(search_term, case=False)]
-            st.dataframe(filtered_df)
-        else:
-            st.dataframe(df_ir)
-        
-        # Tambahkan gambar referensi
-        st.subheader("Referensi Visual Spektrum IR")
-        st.image("https://via.placeholder.com/800x400?text=IR+Spectroscopy+Reference+Chart", 
-                caption="Grafik Referensi untuk Interpretasi Spektrum IR")
-    
-    with tabs[2]:
-        st.subheader("Interpretasi Spektrum IR")
-        st.write("Unggah spektrum IR untuk interpretasi otomatis atau masukkan nilai-nilai puncak secara manual.")
-        
-        method = st.radio("Metode input:", ["Upload File", "Input Manual"])
-        
-        if method == "Upload File":
-            uploaded_file = st.file_uploader("Pilih file CSV spektrum IR", type=["csv"])
-            
-            if uploaded_file is not None:
-                st.success("File berhasil diunggah. Demo interpretasi:")
-                
-                # Demo data untuk interpretasi
-                st.write("**Puncak-puncak yang terdeteksi:**")
-                detection_data = {
-                    'Bilangan Gelombang (cm⁻¹)': [3350, 2950, 1720, 1650, 1450, 1050],
-                    'Intensitas': ['Kuat', 'Medium', 'Kuat', 'Lemah', 'Medium', 'Kuat'],
-                    'Kemungkinan Gugus Fungsi': ['O-H (Alkohol)', 'C-H (Alkana)', 'C=O (Keton/Ester)', 
-                                                'C=C (Alkena)', 'CH₂/CH₃ (Bengkokan)', 'C-O (Eter/Alkohol)']
-                }
-                
-                st.dataframe(pd.DataFrame(detection_data))
-                
-                # Interpretasi
-                st.subheader("Interpretasi Senyawa:")
-                st.markdown("""
-                    <div style='background-color: #E8F5E9; padding: 15px; border-radius: 10px;'>
-                        <h4 style='color: #388E3C;'>Hasil Analisis</h4>
-                        <p>Berdasarkan puncak-puncak yang terdeteksi, sampel kemungkinan merupakan <b>ester alkohol tidak jenuh</b> 
-                        dengan karakteristik sebagai berikut:</p>
-                        <ul>
-                            <li>Adanya gugus hidroksil (O-H) pada 3350 cm⁻¹</li>
-                            <li>Gugus C=O ester pada 1720 cm⁻¹</li>
-                            <li>Ikatan rangkap C=C pada 1650 cm⁻¹</li>
-                            <li>Gugus C-O pada 1050 cm⁻¹</li>
-                        </ul>
-                        <p>Struktur yang mungkin:</p>
-                    </div>
-                """, unsafe_allow_html=True)
-                
-                # Tambahkan opsi untuk visualisasi struktur molekul (placeholder)
-                st.image("https://via.placeholder.com/400x200?text=Molecule+Structure", 
-                        caption="Struktur Molekul yang Diperkirakan")
-        
-        else:  # Input Manual
-            st.write("Masukkan nilai bilangan gelombang dari puncak-puncak spektrum IR yang ingin diinterpretasikan:")
-            
-            col1, col2 = st.columns(2)
-            
-            peaks_input = []
-            
-            with col1:
-                num_peaks = st.number_input("Jumlah puncak yang akan dimasukkan:", min_value=1, max_value=10, value=3)
-                
-                for i in range(num_peaks):
-                    peak_value = st.number_input(f"Bilangan gelombang puncak {i+1} (cm⁻¹):", min_value=400, max_value=4000, value=1000 + i*500)
-                    peaks_input.append(peak_value)
-            
-            with col2:
-                if st.button("Interpretasikan"):
-                    st.write("**Hasil Interpretasi:**")
-                    
-                    # Logika sederhana untuk interpretasi berdasarkan nilai puncak
-                    interpretations = []
-                    
-                    for peak in peaks_input:
-                        if 3200 <= peak <= 3600:
-                            interpretations.append(f"{peak} cm⁻¹: O-H stretching (alkohol/fenol)")
-                        elif 2800 <= peak <= 3000:
-                            interpretations.append(f"{peak} cm⁻¹: C-H stretching (alkana)")
-                        elif 1700 <= peak <= 1750:
-                            interpretations.append(f"{peak} cm⁻¹: C=O stretching (keton/aldehida/ester)")
-                        elif 1620 <= peak <= 1680:
-                            interpretations.append(f"{peak} cm⁻¹: C=C stretching (alkena)")
-                        elif 1000 <= peak <= 1300:
-                            interpretations.append(f"{peak} cm⁻¹: C-O stretching (alkohol/eter/ester)")
-                        elif 1350 <= peak <= 1470:
-                            interpretations.append(f"{peak} cm⁻¹: C-H bending (alkana)")
-                        elif 675 <= peak <= 1000:
-                            interpretations.append(f"{peak} cm⁻¹: =C-H bending (alkena)")
-                        elif 600 <= peak <= 800:
-                            interpretations.append(f"{peak} cm⁻¹: C-Cl stretching (alkil halida)")
-                        else:
-                            interpretations.append(f"{peak} cm⁻¹: Puncak tidak teridentifikasi")
-                    
-                    for interp in interpretations:
-                        st.write(interp)
-                    
-                    # Tambahkan ringkasan
-                    st.markdown("""
-                        <div style='background-color: #E8F5E9; padding: 15px; border-radius: 10px; margin-top: 20px;'>
-                            <h4 style='color: #388E3C;'>Kesimpulan</h4>
-                            <p>Untuk analisis yang lebih akurat, pertimbangkan untuk menggunakan database spektral yang komprehensif atau berkonsultasi dengan ahli spektroskopi.</p>
-                        </div>
-                    """, unsafe_allow_html=True)
-
-elif option == "Raman Spektroskopi":
-    st.markdown("<div class='section-header'>Raman Spektroskopi</div>", unsafe_allow_html=True)
-    
-    st.write("""
-        Spektroskopi Raman adalah metode analisis non-destruktif yang mengukur cahaya terpencar (scattered) dari sampel.
-        Raman memberikan informasi tentang struktur molekul, ikatan kimia, dan interaksi molekular melalui pergeseran energi
-        yang terjadi ketika cahaya monokromatik berinteraksi dengan sampel.
-    """)
-    
-    tabs = st.tabs(["Simulasi Spektrum Raman", "Analisis Data Raman", "Perbandingan dengan IR"])
-    
-    with tabs[0]:
-        st.subheader("Simulasi Spektrum Raman")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            min_shift = st.number_input("Pergeseran Raman Minimum (cm⁻¹)", min_value=0, max_value=3500, value=0, step=100)
-            max_shift = st.number_input("Pergeseran Raman Maksimum (cm⁻¹)", min_value=100, max_value=3500, value=3200, step=100)
-            
-            st.subheader("Tambahkan Puncak Raman")
-            
-            num_peaks = st.slider("Jumlah Puncak", min_value=1, max_value=5, value=3, key="raman_peaks")
-            
-            peaks = []
-            for i in range(num_peaks):
-                st.markdown(f"#### Puncak {i+1}")
-                col_a, col_b, col_c = st.columns(3)
-                with col_a:
-                    peak_pos = st.number_input(f"Posisi (cm⁻¹)", min_value=50, max_value=3500, value=500 + i*800, step=50, key=f"raman_pos_{i}")
-                with col_b:
-                    peak_int = st.slider(f"Intensitas", min_value=0.1, max_value=1.0, value=0.8 - i*0.2, step=0.1, key=f"raman_int_{i}")
-                with col_c:
-                    peak_width = st.slider(f"Lebar", min_value=5, max_value=50, value=20, step=5, key=f"raman_width_{i}")
-                
-                peaks.append((peak_pos, peak_int, peak_width))
-                
-                # Tampilkan informasi mode vibrasi yang mungkin
-                if 1550 <= peak_pos <= 1650:
-                    st.info("Kemungkinan mode vibrasi: C=C stretching (aromatik)")
-                elif 2800 <= peak_pos <= 3000:
-                    st.info("Kemungkinan mode vibrasi: C-H stretching")
-                elif 1000 <= peak_pos <= 1100:
-                    st.info("Kemungkinan mode vibrasi: C-C stretching")
-                elif 500 <= peak_pos <= 800:
-                    st.info("Kemungkinan mode vibrasi: C-X stretching (X = Cl, Br)")
-        
-        with col2:
-            shift_range = np.linspace(min_shift, max_shift, 1000)
-            raman_spectrum = generate_raman_spectrum(shift_range, peaks)
-            
-            plt.figure(figsize=(10, 6))
-            plt.plot(shift_range, raman_spectrum)
-            plt.title("Simulasi Spektrum Raman")
-            plt.xlabel("Pergeseran Raman (cm⁻¹)")
-            plt.ylabel("Intensitas")
-            plt.grid(True, linestyle='--', alpha=0.7)
-            plt.ylim(0, max(raman_spectrum) * 1.1)
-            
-            # Anotasi puncak-puncak
-            for i, (peak_pos, peak_int, _) in enumerate(peaks):
-                peak_idx = np.abs(shift_range - peak_pos).argmin()
-                plt.annotate(f"{peak_pos} cm⁻¹",
-                            xy=(shift_range[peak_idx], raman_spectrum[peak_idx]),
-                            xytext=(shift_range[peak_idx] + 50, raman_spectrum[peak_idx] + 0.05),
-                            arrowprops=dict(arrowstyle="->", color="red"))
-            
-            st.pyplot(plt)
-            
-            # Opsi untuk mengunduh data
-            df_spectrum = pd.DataFrame({
-                'Raman Shift (cm⁻¹)': shift_range,
-                'Intensity': raman_spectrum
-            })
-            
-            csv = df_spectrum.to_csv(index=False)
-            st.download_button(
-                label="Unduh Data Spektrum (CSV)",
-                data=csv,
-                file_name="raman_spectrum.csv",
-                mime="text/csv"
-            )
-            
-            # Tambahkan informasi tentang senyawa referensi
-            st.subheader("Interpretasi Awal")
-            st.markdown("""
-                <div style='background-color: #FFF3E0; padding: 15px; border-radius: 10px;'>
-                    <h4 style='color: #E64A19;'>Kemungkinan Gugus Fungsi</h4>
-                    <p>Spektrum ini menunjukkan pola yang mirip dengan:</p>
-                    <ul>
-                        <li>Senyawa aromatik (1600 cm⁻¹)</li>
-                        <li>Gugus alkil (2900 cm⁻¹)</li>
-                        <li>Struktur rantai karbon (800-1200 cm⁻¹)</li>
-                    </ul>
-                </div>
-            """, unsafe_allow_html=True)
-    
-    with tabs[1]:
-        st.subheader("Analisis Data Raman")
-        st.write("Unggah file CSV dengan data spektrum Raman untuk analisis lanjutan.")
-        
-        uploaded_file = st.file_uploader("Pilih file CSV", type=["csv"], key="raman_uploader")
-        
-        if uploaded_file is not None:
-            try:
-                # Demo analisis data Raman
-                st.success("File berhasil diunggah. Menampilkan hasil analisis demo:")
-                
-                # Simulasi data untuk demonstrasi
-                shift = np.linspace(0, 3200, 1000)
-                intensity = np.zeros_like(shift)
-                
-                # Tambahkan beberapa puncak demo
-                peaks_demo = [(485, 0.6, 30), (1008, 1.0, 15), (1340, 0.4, 20), (1580, 0.7, 25), (2900, 0.5, 35)]
-                for pos, height, width in peaks_demo:
-                    intensity += height * (width**2 / ((shift - pos)**2 + width**2))
-                
-                intensity += np.random.normal(0, 0.01, size=len(shift))  # Tambahkan noise
-                
-                df_demo = pd.DataFrame({
-                    'Raman Shift (cm⁻¹)': shift,
-                    'Intensity': intensity
-                })
-                
-                # Tampilkan preview data
-                st.write("**Preview data spektrum:**")
-                st.dataframe(df_demo.head())
-                
-                # Plot spektrum
-                plt.figure(figsize=(12, 6))
-                plt.plot(df_demo['Raman Shift (cm⁻¹)'], df_demo['Intensity'])
-                plt.title("Spektrum Raman")
-                plt.xlabel("Pergeseran Raman (cm⁻¹)")
-                plt.ylabel("Intensitas")
-                plt.grid(True, linestyle='--', alpha=0.7)
-                
-                # Temukan puncak-puncak
-                from scipy.signal import find_peaks
-                peaks, properties = find_peaks(df_demo['Intensity'], height=0.2, distance=50, prominence=0.1)
-                
-                plt.plot(df_demo['Raman Shift (cm⁻¹)'].iloc[peaks], df_demo['Intensity'].iloc[peaks], "ro")
-                for i, peak in enumerate(peaks):
-                    plt.annotate(f"{df_demo['Raman Shift (cm⁻¹)'].iloc[peak]:.0f}",
-                                xy=(df_demo['Raman Shift (cm⁻¹)'].iloc[peak], df_demo['Intensity'].iloc[peak]),
-                                xytext=(df_demo['Raman Shift (cm⁻¹)'].iloc[peak] - 100, df_demo['Intensity'].iloc[peak] + 0.05),
-                                arrowprops=dict(arrowstyle="->", color="red"))
-                
-                st.pyplot(plt)
-                
-                # Analisis hasil
-                st.subheader("Hasil Analisis Puncak")
-                
-                # Tampilkan tabel analisis puncak
-                peak_results = pd.DataFrame({
-                    'Puncak': range(1, len(peaks) + 1),
-                    'Pergeseran (cm⁻¹)': df_demo['Raman Shift (cm⁻¹)'].iloc[peaks].round(1),
-                    'Intensitas': df_demo['Intensity'].iloc[peaks].round(3),
-                    'Lebar Puncak (FWHM)': [40, 30, 25, 35, 45],  # Nilai demo
-                    'Area Puncak': [25, 45, 12, 30, 22]  # Nilai demo
-                })
-                
-                st.dataframe(peak_results)
-                
-                # Tambahkan interpretasi
-                st.subheader("Interpretasi Spektrum")
-                
-                # Tampilkan informasi interpretasi
-                st.markdown("""
-                    <div style='background-color: #FFF3E0; padding: 15px; border-radius: 10px;'>
-                        <h4 style='color: #E64A19;'>Kemungkinan Identifikasi</h4>
-                        <p>Berdasarkan puncak-puncak karakteristik yang terdeteksi:</p>
-                        <ul>
-                            <li><strong>485 cm⁻¹</strong>: Mode breathing aromatik</li>
-                            <li><strong>1008 cm⁻¹</strong>: C-C stretching</li>
-                            <li><strong>1340 cm⁻¹</strong>: Mode D (defek dalam struktur karbon)</li>
-                            <li><strong>1580 cm⁻¹</strong>: Mode G (ikatan sp² dalam karbon)</li>
-                            <li><strong>2900 cm⁻¹</strong>: C-H stretching</li>
-                        </ul>
-                        <p>Spektrum ini menunjukkan karakteristik <strong>material karbon/grafit</strong> dengan beberapa gugus fungsional permukaan.</p>
-                    </div>
-                """, unsafe_allow_html=True)
-                
-                # Tambahkan opsi untuk preprocessing lanjutan
-                st.subheader("Preprocessing Lanjutan")
-                
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    baseline_correction = st.checkbox("Koreksi Baseline")
-                    smoothing = st.checkbox("Smoothing Data")
-                    normalization = st.checkbox("Normalisasi")
-                
-                with col2:
-                    if baseline_correction or smoothing or normalization:
-                        st.info("Preprocessing akan diterapkan pada data. Klik tombol di bawah untuk menerapkan.")
-                        
-                        if st.button("Terapkan Preprocessing"):
-                            st.success("Preprocessing berhasil diterapkan!")
-                            
-                            # Demo hasil preprocessing (data yang sama dengan beberapa modifikasi)
-                            plt.figure(figsize=(12, 6))
-                            plt.plot(df_demo['Raman Shift (cm⁻¹)'], df_demo['Intensity'] * 1.2, label="Setelah preprocessing")
-                            plt.plot(df_demo['Raman Shift (cm⁻¹)'], df_demo['Intensity'], '--', alpha=0.5, label="Data asli")
-                            plt.title("Spektrum Raman Setelah Preprocessing")
-                            plt.xlabel("Pergeseran Raman (cm⁻¹)")
-                            plt.ylabel("Intensitas")
-                            plt.grid(True, linestyle='--', alpha=0.7)
-                            plt.legend()
-                            
-                            st.pyplot(plt)
-                
-            except Exception as e:
-                st.error(f"Terjadi kesalahan saat memproses file: {e}")
-                st.write("Pastikan format file sesuai dengan yang diharapkan.")
-    
-    with tabs[2]:
-        st.subheader("Perbandingan dengan Spektroskopi IR")
-        
-        st.write("""
-            Spektroskopi Raman dan IR adalah teknik pelengkap yang memberikan informasi tentang mode vibrasi molekul.
-            Meskipun demikian, keduanya memiliki prinsip fisika yang berbeda dan memberikan informasi yang saling melengkapi.
-        """)
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("""
-                <div style='background-color: #E3F2FD; padding: 15px; border-radius: 10px;'>
-                    <h4 style='color: #1976D2; text-align: center;'>Spektroskopi IR</h4>
-                    <ul>
-                        <li><strong>Prinsip:</strong> Absorpsi energi IR oleh sampel</li>
-                        <li><strong>Syarat:</strong> Perubahan momen dipol saat vibrasi</li>
-                        <li><strong>Mode Aktif:</strong> Mode asimetris</li>
-                        <li><strong>Sampel:</strong> Lebih baik untuk sampel polar</li>
-                        <li><strong>Interferensi:</strong> Air sangat mengganggu</li>
-                        <li><strong>Preparasi:</strong> Memerlukan preparasi khusus</li>
-                    </ul>
-                </div>
-            """, unsafe_allow_html=True)
-        
-        with col2:
-            st.markdown("""
-                <div style='background-color: #FFF3E0; padding: 15px; border-radius: 10px;'>
-                    <h4 style='color: #E64A19; text-align: center;'>Spektroskopi Raman</h4>
-                    <ul>
-                        <li><strong>Prinsip:</strong> Hamburan inelastis foton</li>
-                        <li><strong>Syarat:</strong> Perubahan polarisabilitas saat vibrasi</li>
-                        <li><strong>Mode Aktif:</strong> Mode simetris</li>
-                        <li><strong>Sampel:</strong> Lebih baik untuk sampel non-polar</li>
-                        <li><strong>Interferensi:</strong> Air tidak mengganggu</li>
-                        <li><strong>Preparasi:</strong> Minimal atau tidak perlu</li>
-                    </ul>
-                </div>
-            """, unsafe_allow_html=True)
-        
-        st.subheader("Perbandingan Spektrum")
-        
-        # Demo perbandingan spektrum
-        shift = np.linspace(500, 3500, 1000)
-        
-        # Simulasi spektrum IR
-        ir_spectrum = np.zeros_like(shift)
-        ir_peaks = [(1050, 0.7, 50), (1380, 0.4, 30), (1720, 0.9, 40), (2950, 0.6, 60), (3400, 0.85, 100)]
-        for pos, height, width in ir_peaks:
-            ir_spectrum += height * np.exp(-((shift - pos) ** 2) / (2 * width ** 2))
-        
-        # Simulasi spektrum Raman (puncak berbeda dari IR untuk menunjukkan komplementer)
-        raman_spectrum = np.zeros_like(shift)
-        raman_peaks = [(520, 0.9, 15), (1000, 0.5, 25), (1330, 0.7, 35), (1590, 0.95, 30), (2900, 0.4, 50)]
-        for pos, height, width in raman_peaks:
-            raman_spectrum += height * (width**2 / ((shift - pos)**2 + width**2))
-        
-        # Plot perbandingan
-        plt.figure(figsize=(12, 8))
-        
-        plt.subplot(2, 1, 1)
-        plt.plot(shift, 1 - ir_spectrum, 'b-')
-        plt.title("Spektrum IR")
-        plt.xlabel("Bilangan Gelombang (cm⁻¹)")
-        plt.ylabel("Transmitansi")
-        plt.grid(True, linestyle='--', alpha=0.7)
-        plt.gca().invert_xaxis()  # Inversi sumbu x untuk IR
-        
-        plt.subplot(2, 1, 2)
-        plt.plot(shift, raman_spectrum, 'r-')
-        plt.title("Spektrum Raman")
-        plt.xlabel("Pergeseran Raman (cm⁻¹)")
-        plt.ylabel("Intensitas")
-        plt.grid(True, linestyle='--', alpha=0.7)
-        
-        plt.tight_layout()
-        st.pyplot(plt)
-        
-        st.markdown("""
-            <div style='background-color: #F5F5F5; padding: 15px; border-radius: 10px; margin-top: 20px;'>
-                <h4 style='color: #212121; text-align: center;'>Kapan Menggunakan Masing-masing Teknik?</h4>
-                <table style='width: 100%; border-collapse: collapse;'>
-                    <tr>
-                        <th style='border: 1px solid #ddd; padding: 8px; text-align: left;'>Situasi</th>
-                        <th style='border: 1px solid #ddd; padding: 8px; text-align: left;'>Pilihan Teknik</th>
-                    </tr>
-                    <tr>
-                        <td style='border: 1px solid #ddd; padding: 8px;'>Sampel berair</td>
-                        <td style='border: 1px solid #ddd; padding: 8px;'>Raman</td>
-                    </tr>
-                    <tr>
-                        <td style='border: 1px solid #ddd; padding: 8px;'>Sampel dengan gugus polar (OH, NH, C=O)</td>
-                        <td style='border: 1px solid #ddd; padding: 8px;'>IR</td>
-                    </tr>
-                    <tr>
-                        <td style='border: 1px solid #ddd; padding: 8px;'>Sampel dengan ikatan simetris (C=C, S-S)</td>
-                        <td style='border: 1px solid #ddd; padding: 8px;'>Raman</td>
-                    </tr>
-                    <tr>
-                        <td style='border: 1px solid #ddd; padding: 8px;'>Analisis in-situ</td>
-                        <td style='border: 1px solid #ddd; padding: 8px;'>Raman</td>
-                    </tr>
-                    <tr>
-                        <td style='border: 1px solid #ddd; padding: 8px;'>Sampel fluoresen</td>
-                        <td style='border: 1px solid #ddd; padding: 8px;'>IR</td>
-                    </tr>
-                    <tr>
-                        <td style='border: 1px solid #ddd; padding: 8px;'>Informasi struktural terlengkap</td>
-                        <td style='border: 1px solid #ddd; padding: 8px;'>Kombinasi keduanya</td>
-                    </tr>
-                </table>
+    <div class="info-section">
+        <h3>🌍 Aplikasi Spektrofotometri UV-Vis</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+            <div class="application-item">
+                <strong>🏥 Farmasi & Kesehatan</strong><br>
+                Analisis obat, vitamin, dan senyawa bioaktif
             </div>
-        """, unsafe_allow_html=True)
+            <div class="application-item">
+                <strong>🌊 Lingkungan</strong><br>
+                Monitoring kualitas air dan deteksi polutan
+            </div>
+            <div class="application-item">
+                <strong>🍎 Pangan</strong><br>
+                Analisis kandungan nutrisi dan kontaminan
+            </div>
+            <div class="application-item">
+                <strong>🧪 Industri Kimia</strong><br>
+                Kontrol kualitas dan analisis bahan baku
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Fitur aplikasi dengan card design
+    st.markdown("<h2 style='text-align: center; color: #2c3e50; margin: 3rem 0 2rem 0;'>⚙️ Fitur Unggulan Aplikasi</h2>", unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3)
+    
+    # Load animasi
+    lottie_kadar = load_lottieurl("https://lottie.host/765b6ca4-5e8a-4baf-b1f8-703bc83b6e12/eKBFeaUGKE.json")
+    lottie_rpd = load_lottieurl("https://lottie.host/3404aaaa-4440-49d3-8015-a91ad8a5d529/hgcgSw6HUz.json")
+    lottie_rec = load_lottieurl("https://lottie.host/c23cbd35-6d04-490e-8a28-162d08f97c2e/dgvwoV7Ytb.json")
 
-elif option == "Tentang Aplikasi":
-    st.markdown("<div class='section-header'>Tentang Aplikasi</div>", unsafe_allow_html=True)
+    with col1:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        if lottie_kadar:
+            st_lottie(lottie_kadar, height=120, key="kadar")
+        st.markdown('<div class="feature-title">📏 Perhitungan C Terukur & Kadar</div>', unsafe_allow_html=True)
+        st.markdown('<div class="feature-description">Menghitung konsentrasi terukur dan kadar senyawa berdasarkan nilai absorbansi menggunakan persamaan regresi linier kurva standar</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col2:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        if lottie_rpd:
+            st_lottie(lottie_rpd, height=120, key="rpd")
+        st.markdown('<div class="feature-title">🔄 Perhitungan %RPD</div>', unsafe_allow_html=True)
+        st.markdown('<div class="feature-description">Evaluasi presisi dan kehandalan pengukuran duplikat dengan menghitung Relative Percent Difference untuk kontrol kualitas</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col3:
+        st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+        if lottie_rec:
+            st_lottie(lottie_rec, height=120, key="rec")
+        st.markdown('<div class="feature-title">🎯 Perhitungan %Recovery</div>', unsafe_allow_html=True)
+        st.markdown('<div class="feature-description">Mengukur akurasi metode analisis melalui perhitungan persentase perolehan kembali analit yang ditambahkan</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    st.write("""
-        Aplikasi Kalkulator Spektroskopi ini dirancang sebagai alat pembelajaran dan analisis untuk membantu mahasiswa,
-        peneliti, dan praktisi dalam bidang spektroskopi. Aplikasi ini menyediakan berbagai alat untuk simulasi dan
-        interpretasi data spektroskopi UV-Vis, IR, dan Raman.
-    """)
+    # Keunggulan aplikasi
+    st.markdown("""
+    <div class="info-section" style="margin-top: 3rem;">
+        <h3>✨ Keunggulan Aplikasi</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+            <div class="principle-item">
+                <strong>🚀 User-Friendly Interface</strong><br>
+                Antarmuka intuitif dengan panduan langkah demi langkah
+            </div>
+            <div class="principle-item">
+                <strong>🎯 Akurasi Tinggi</strong><br>
+                Perhitungan presisi hingga 7 digit desimal
+            </div>
+            <div class="principle-item">
+                <strong>📊 Multiple Calculations</strong><br>
+                Mendukung perhitungan batch hingga 50 sampel
+            </div>
+            <div class="principle-item">
+                <strong>📱 Responsive Design</strong><br>
+                Dapat diakses dari berbagai perangkat
+            </div>
+            <div class="principle-item">
+                <strong>⚡ Real-time Results</strong><br>
+                Hasil perhitungan langsung dan interpretasi otomatis
+            </div>
+            <div class="principle-item">
+                <strong>🔍 Quality Control</strong><br>
+                Evaluasi otomatis berdasarkan standar analitis
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
-    # Informasi versi dan pengembang
+    # Footer
+    st.markdown("""
+    <div class="footer">
+        <p>© 2025 🧪 Aplikasi Perhitungan Kadar Spektrofotometri UV-Vis | Kelompok 4 1F</p>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem;">Dikembangkan untuk mendukung analisis kuantitatif yang akurat dan efisien</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Halaman Tentang Aplikasi
+def tentang():
+    st.markdown("""
+    <div class="about-hero">
+        <h1>📖 Tentang Aplikasi</h1>
+        <p style="font-size: 1.2rem; margin-top: 1rem;">Platform Digital untuk Analisis Spektrofotometri UV-Vis</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Overview aplikasi
+    st.markdown("""
+    <div class="about-section">
+        <h3>🎯 Overview Aplikasi</h3>
+        <p style="text-align: justify; line-height: 1.8; font-size: 1.1rem;">
+            Aplikasi Perhitungan Kadar Spektrofotometri UV-Vis adalah platform digital yang dirancang khusus 
+            untuk membantu analis laboratorium, mahasiswa, dan peneliti dalam melakukan perhitungan analisis 
+            kuantitatif menggunakan metode spektrofotometri UV-Vis. Aplikasi ini mengintegrasikan berbagai 
+            formula perhitungan yang essential dalam analisis spektrofotometri untuk menghasilkan data yang 
+            akurat dan reliabel.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Tujuan dan manfaat
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("""
-            <div style='background-color: #E8EAF6; padding: 20px; border-radius: 10px;'>
-                <h3 style='color: #3F51B5; text-align: center;'>Informasi Aplikasi</h3>
-                <ul>
-                    <li><strong>Nama:</strong> Kalkulator Spektroskopi</li>
-                    <li><strong>Versi:</strong> 2.0</li>
-                    <li><strong>Tanggal Rilis:</strong> Mei 2025</li>
-                    <li><strong>Pengembang:</strong> Lab Spektroskopi</li>
-                    <li><strong>Framework:</strong> Streamlit</li>
-                    <li><strong>Bahasa:</strong> Python</li>
-                </ul>
-            </div>
+        <div class="about-section">
+            <h3>🎯 Tujuan Aplikasi</h3>
+            <ul style="line-height: 2;">
+                <li><strong>Mempermudah</strong> perhitungan konsentrasi terukur dari data absorbansi</li>
+                <li><strong>Mengotomatisasi</strong> perhitungan kadar dengan berbagai metode</li>
+                <li><strong>Mengevaluasi</strong> presisi melalui perhitungan %RPD</li>
+                <li><strong>Mengukur</strong> akurasi metode melalui %Recovery</li>
+                <li><strong>Menyediakan</strong> interpretasi hasil berdasarkan standar analitis</li>
+                <li><strong>Mengurangi</strong> kesalahan perhitungan manual</li>
+            </ul>
+        </div>
         """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
-            <div style='background-color: #E0F7FA; padding: 20px; border-radius: 10px;'>
-                <h3 style='color: #0097A7; text-align: center;'>Fitur Utama</h3>
-                <ul>
-                    <li>Kalkulator konsentrasi UV-Vis (Lambert-Beer)</li>
-                    <li>Simulasi spektrum UV-Vis, IR, dan Raman</li>
-                    <li>Analisis dan interpretasi data spektral</li>
-                    <li>Database gugus fungsi IR</li>
-                    <li>Perbandingan teknik spektroskopi</li>
-                    <li>Visualisasi interaktif</li>
-                </ul>
-            </div>
+        <div class="about-section">
+            <h3>💡 Manfaat Aplikasi</h3>
+            <ul style="line-height: 2;">
+                <li><strong>Efisiensi Waktu:</strong> Perhitungan otomatis dan cepat</li>
+                <li><strong>Akurasi Tinggi:</strong> Minimalisir human error</li>
+                <li><strong>Batch Processing:</strong> Hingga 50 sampel sekaligus</li>
+                <li><strong>Quality Control:</strong> Evaluasi otomatis hasil</li>
+                <li><strong>User-Friendly:</strong> Interface yang mudah dipahami</li>
+                <li><strong>Accessibility:</strong> Dapat diakses kapan saja</li>
+            </ul>
+        </div>
         """, unsafe_allow_html=True)
     
-    # FAQ
-    st.markdown("<h3 style='margin-top: 30px;'>Pertanyaan yang Sering Diajukan (FAQ)</h3>", unsafe_allow_html=True)
-    
-    with st.expander("Apa itu spektroskopi?"):
-        st.write("""
-            Spektroskopi adalah studi tentang interaksi antara materi dan energi elektromagnetik. 
-            Dalam konteks kimia analitik, spektroskopi merujuk pada metode eksperimental untuk mengukur 
-            spektrum yang dihasilkan dari interaksi radiasi elektromagnetik dengan materi, yang dapat 
-            memberikan informasi tentang struktur, komposisi, dan sifat dari zat tersebut.
-        """)
-    
-    with st.expander("Bagaimana cara menggunakan aplikasi ini untuk analisis sampel nyata?"):
-        st.write("""
-            Untuk sampel nyata, Anda dapat mengikuti langkah-langkah berikut:
-            1. Lakukan pengukuran spektrum dengan instrumen yang sesuai (UV-Vis, IR, atau Raman)
-            2. Ekspor data dalam format CSV
-            3. Unggah data tersebut ke aplikasi ini menggunakan fitur "Analisis Data" di masing-masing bagian
-            4. Gunakan alat analisis untuk menginterpretasikan hasil
-            
-            Perlu diingat bahwa aplikasi ini memiliki keterbatasan dan sebaiknya digunakan sebagai alat bantu, 
-            bukan sebagai pengganti instrumen laboratorium atau penilaian ahli.
-        """)
-    
-    with st.expander("Apakah data yang diunggah akan tersimpan di server?"):
-        st.write("""
-            Tidak. Data yang Anda unggah hanya diproses secara lokal di browser Anda dan tidak disimpan di server.
-            Setelah sesi browser ditutup atau halaman di-refresh, data akan dihapus dari memori.
-        """)
-    
-    with st.expander("Bisakah saya mengekspor hasil analisis?"):
-        st.write("""
-            Ya, aplikasi ini menyediakan opsi untuk mengunduh data simulasi dan hasil analisis dalam format CSV 
-            pada sebagian besar fitur. Selain itu, Anda dapat menggunakan fungsi screenshot browser untuk menyimpan 
-            visualisasi dan interpretasi yang dihasilkan.
-        """)
-    
-    with st.expander("Saya menemukan bug atau ingin menyarankan fitur baru. Bagaimana caranya?"):
-        st.write("""
-            Silakan laporkan bug atau saran peningkatan dengan mengirimkan email ke support@labspektroskopi.com 
-            dengan subjek "Feedback Kalkulator Spektroskopi". Kami sangat menghargai masukan Anda untuk pengembangan aplikasi ini.
-        """)
-    
-    # Referensi
-    st.markdown("<h3 style='margin-top: 30px;'>Referensi dan Sumber Belajar</h3>", unsafe_allow_html=True)
-    
+    # Fitur detail
     st.markdown("""
-        <div style='background-color: #ECEFF1; padding: 20px; border-radius: 10px;'>
-            <h4 style='color: #455A64;'>Buku dan Publikasi</h4>
-            <ul>
-                <li>Pavia, D. L., Lampman, G. M., Kriz, G. S., & Vyvyan, J. R. (2014). <em>Introduction to Spectroscopy</em>. Cengage Learning.</li>
-                <li>Skoog, D. A., Holler, F. J., & Crouch, S. R. (2017). <em>Principles of Instrumental Analysis</em>. Cengage Learning.</li>
-                <li>Smith, B. C. (2011). <em>Fundamentals of Fourier Transform Infrared Spectroscopy</em>. CRC Press.</li>
-                <li>Ferraro, J. R., Nakamoto, K., & Brown, C. W. (2003). <em>Introductory Raman Spectroscopy</em>. Academic Press.</li>
-            </ul>
+    <div class="about-section">
+        <h3>🔧 Fitur Lengkap Aplikasi</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+            <div class="principle-item">
+                <h4 style="color: #667eea; margin-bottom: 0.5rem;">📏 Perhitungan C Terukur</h4>
+                <p>Menghitung konsentrasi terukur dari nilai absorbansi menggunakan persamaan linier:</p>
+                <code style="background: #f8f9fa; padding: 0.3rem; border-radius: 4px;">C = (A - b) / m</code>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem;">Mendukung batch calculation hingga 50 sampel</p>
+            </div>
             
-            <h4 style='color: #455A64; margin-top: 20px;'>Sumber Online</h4>
-            <ul>
-                <li><a href='#'>NIST Chemistry WebBook</a> - Database spektra referensi</li>
-                <li><a href='#'>Spectroscopy Now</a> - Portal informasi spektroskopi</li>
-                <li><a href='#'>Royal Society of Chemistry - Spectroscopy Resources</a></li>
-                <li><a href='#'>SpectraBase</a> - Koleksi spektra dari berbagai teknik</li>
-            </ul>
+            <div class="principle-item">
+                <h4 style="color: #28a745; margin-bottom: 0.5rem;">📊 Perhitungan Kadar</h4>
+                <p><strong>Tipe A:</strong> Tanpa bobot sampel (mg/L)</p>
+                <code style="background: #f8f9fa; padding: 0.3rem; border-radius: 4px;">Kadar = (C - Blanko) × FP</code>
+                <p><strong>Tipe B:</strong> Dengan bobot sampel (mg/kg)</p>
+                <code style="background: #f8f9fa; padding: 0.3rem; border-radius: 4px;">Kadar = (C × V) / W</code>
+            </div>
+            
+            <div class="principle-item">
+                <h4 style="color: #ffc107; margin-bottom: 0.5rem;">🔄 Perhitungan %RPD</h4>
+                <p>Relative Percent Difference untuk evaluasi presisi:</p>
+                <code style="background: #f8f9fa; padding: 0.3rem; border-radius: 4px;">%RPD = |C1-C2| / ((C1+C2)/2) × 100%</code>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem;">Interpretasi otomatis: < 5% = konsisten</p>
+            </div>
+            
+            <div class="principle-item">
+                <h4 style="color: #dc3545; margin-bottom: 0.5rem;">🎯 Perhitungan %Recovery</h4>
+                <p>Persentase perolehan kembali untuk evaluasi akurasi:</p>
+                <code style="background: #f8f9fa; padding: 0.3rem; border-radius: 4px;">%REC = (C3-C1) / C2 × 100%</code>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem;">Range optimal: 80-120%</p>
+            </div>
         </div>
+    </div>
     """, unsafe_allow_html=True)
     
-    # Footer
-    st.markdown("---")
+    # Basis ilmiah
     st.markdown("""
-        <div style='text-align: center; color: gray; font-size: 14px;'>
-            © 2025 Lab Spektroskopi | Dikembangkan untuk keperluan pendidikan dan penelitian
+    <div class="about-section">
+        <h3>🧬 Basis Ilmiah</h3>
+        <div class="principle-item" style="margin-bottom: 1rem;">
+            <h4 style="color: #667eea;">📐 Hukum Lambert-Beer</h4>
+            <p style="text-align: justify;">
+                Aplikasi ini berdasarkan pada Hukum Lambert-Beer yang menyatakan hubungan linier antara 
+                absorbansi (A) dengan konsentrasi (C): <strong>A = ε × b × C</strong>, dimana ε adalah 
+                koefisien absorptivitas molar dan b adalah panjang jalur optik.
+            </p>
         </div>
+        
+        <div class="principle-item" style="margin-bottom: 1rem;">
+            <h4 style="color: #28a745;">📊 Validasi Metode Analitik</h4>
+            <p style="text-align: justify;">
+                Parameter %RPD dan %Recovery mengacu pada guidelines internasional seperti ICH, AOAC, dan EPA 
+                untuk validasi metode analitik, memastikan hasil analisis yang reliable dan acceptable.
+            </p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Target pengguna
+    st.markdown("""
+    <div class="about-section">
+        <h3>👥 Target Pengguna</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+            <div class="application-item">
+                <strong>🔬 Analis Laboratorium</strong><br>
+                Quality control dan analisis rutin
+            </div>
+            <div class="application-item">
+                <strong>🎓 Mahasiswa</strong><br>
+                Pembelajaran dan praktikum analitik
+            </div>
+            <div class="application-item">
+                <strong>👨‍🔬 Peneliti</strong><br>
+                Riset dan pengembangan metode
+            </div>
+            <div class="application-item">
+                <strong>🏭 Industri</strong><br>
+                Kontrol kualitas produk
+            </div>
+        </div>
+    </div>
     """, unsafe_allow_html=True)
 
-# Footer atau keterangan tambahan
+# Fungsi c terukur dengan styling yang diperbaiki
+def c_terukur():
+    st.markdown("""
+    <div class="header-container">
+        <h1>🔬 Perhitungan C Terukur</h1>
+        <p class="header-subtitle">Menghitung konsentrasi terukur dari nilai absorbansi menggunakan persamaan regresi linier</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Animasi Lottie
+    lottie_url = "https://lottie.host/5ee6c7e7-3c7b-473f-b75c-df412fe210cc/kF9j77AAsG.json"
+    lottie_json = load_lottieurl(lottie_url)
+    if lottie_json:
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st_lottie(lottie_json, height=200, key="anim_c_terukur")
+
+    # Info formula
+    st.markdown("""
+    <div class="info-section">
+        <h3>📐 Formula Perhitungan</h3>
+        <p style="text-align: center; font-size: 1.2rem; font-weight: 500;">
+            <code style="background: #667eea; color: white; padding: 0.5rem 1rem; border-radius: 8px; font-size: 1.1rem;">
+            C terukur = (A - b) / m
+            </code>
+        </p>
+        <p style="text-align: center; margin-top: 1rem; color: #6c757d;">
+            Dimana: A = Absorbansi, b = Intercept, m = Slope (gradien kurva standar)
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Pilih jumlah perhitungan
+    n = st.number_input("Jumlah perhitungan sampel (maks. 50)", min_value=1, max_value=50, value=1, step=1)
+
+    # Tempat menyimpan hasil
+    results = []
+
+    for i in range(1, n+1):
+        st.markdown(f"""
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 1rem 0;">
+            <h4 style="color: #667eea; margin-bottom: 1rem;">📊 Sampel #{i}</h4>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        nama = st.text_input(f"Nama Sampel #{i}", value=f"Sample {i}", key=f"nama_{i}")
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            absorban = st.number_input(f"Absorbansi (A)", format="%.4f",
+                                       min_value=0.0, step=0.0001, key=f"a_{i}")
+        with col2:
+            intercept = st.number_input(f"Intercept (b)", format="%.4f",
+                                        min_value=0.0, step=0.0001, key=f"b_{i}")
+        with col3:
+            slope = st.number_input(f"Slope (m)", format="%.4f",
+                                    min_value=0.0001, step=0.0001, key=f"m_{i}")
+
+        # Hitung segera, tapi tampilin nanti
+        c_ukur = (absorban - intercept) / slope
+        # Simpan nama + hasil rounded 4 desimal
+        results.append((nama, round(c_ukur, 4)))
+
+        st.markdown("---")
+
+    # Tampilkan semua hasil
+    if st.button("🧮 Hitung Semua C Terukur", key="btn_c_terukur"):
+        st.markdown("## 📋 Hasil Perhitungan C Terukur")
+        for nama, nilai in results:
+            st.success(f"📊 Konsentrasi terukur pada '{nama}' = **{nilai:.4f} mg/L (ppm)**")
+
+# Fungsi Kadar dengan styling yang diperbaiki
+def kadar():
+    st.markdown("""
+    <div class="header-container">
+        <h1>📏 Perhitungan Kadar</h1>
+        <p class="header-subtitle">Menghitung kadar senyawa dengan dua metode: tanpa bobot sampel dan dengan bobot sampel</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Animasi lottie
+    lottie_url = "https://lottie.host/765b6ca4-5e8a-4baf-b1f8-703bc83b6e12/eKBFeaUGKE.json"
+    lottie_json = load_lottieurl(lottie_url)
+    if lottie_json:
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st_lottie(lottie_json, height=200, key="anim_kadar")
+
+    # Pilih tipe perhitungan
+    tipe = st.radio("Pilih jenis perhitungan:",
+                    ("A. Tanpa Bobot Sample (ppm/mg·L⁻¹)",
+                     "B. Dengan Bobot Sample (mg·kg⁻¹)"))
+
+    # Info formula berdasarkan tipe
+    if tipe.startswith("A"):
+        st.markdown("""
+        <div class="info-section">
+            <h3>📐 Formula Tipe A (Tanpa Bobot Sample)</h3>
+            <p style="text-align: center; font-size: 1.2rem; font-weight: 500;">
+                <code style="background: #28a745; color: white; padding: 0.5rem 1rem; border-radius: 8px; font-size: 1.1rem;">
+                Kadar = (C terukur - C blanko) × Faktor Pengenceran
+                </code>
+            </p>
+            <p style="text-align: center; margin-top: 1rem; color: #6c757d;">
+                Hasil dalam satuan: mg/L (ppm)
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div class="info-section">
+            <h3>📐 Formula Tipe B (Dengan Bobot Sample)</h3>
+            <p style="text-align: center; font-size: 1.2rem; font-weight: 500;">
+                <code style="background: #dc3545; color: white; padding: 0.5rem 1rem; border-radius: 8px; font-size: 1.1rem;">
+                Kadar = (C terukur × Volume labu takar) / Bobot sampel
+                </code>
+            </p>
+            <p style="text-align: center; margin-top: 1rem; color: #6c757d;">
+                Hasil dalam satuan: mg/kg
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Jumlah sampel (1–50)
+    n = st.number_input("Jumlah sampel (maks. 50)", min_value=1, max_value=50, value=1, step=1)
+
+    results = []
+
+    for i in range(1, n+1):
+        st.markdown(f"""
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 1rem 0;">
+            <h4 style="color: #667eea; margin-bottom: 1rem;">📊 Sampel #{i}</h4>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        nama = st.text_input(f"Nama Sampel #{i}", f"Sample {i}", key=f"k_nama_{i}")
+
+        if tipe.startswith("A"):
+            # A: tanpa bobot sample
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                c_ukur = st.number_input(
+                    f"C terukur (mg/L)",
+                    min_value=0.0, value=0.0, step=0.0000001,
+                    format="%.7f",
+                    key=f"kA_c_{i}"
+                )
+            with col2:
+                blanko = st.number_input(
+                    f"C terukur blanko (mg/L)",
+                    min_value=0.0, value=0.0, step=0.0000001,
+                    format="%.7f",
+                    key=f"kA_b_{i}"
+                )
+            with col3:
+                faktor = st.number_input(
+                    f"Faktor Pengenceran",
+                    min_value=0.0, value=0.0, step=0.0000001,
+                    format="%.7f",
+                    key=f"kA_f_{i}"
+                )
+
+            nilai = (c_ukur - blanko) * faktor
+            satuan = "mg/L (ppm)"
+
+        else:
+            # B: dengan bobot sample
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                c_ukur = st.number_input(
+                    f"C terukur (mg/L)",
+                    min_value=0.0, value=0.0, step=0.0000001,
+                    format="%.7f",
+                    key=f"kB_c_{i}"
+                )
+            with col2:
+                vol = st.number_input(
+                    f"Volume labu takar (L)",
+                    min_value=0.0, value=0.0, step=0.0000001,
+                    format="%.7f",
+                    key=f"kB_v_{i}"
+                )
+            with col3:
+                bobot = st.number_input(
+                    f"Bobot sample (kg)",
+                    min_value=0.0, value=0.0, step=0.0000001,
+                    format="%.7f",
+                    key=f"kB_w_{i}"
+                )
+
+            nilai = (c_ukur * vol) / bobot if bobot != 0 else 0.0
+            satuan = "mg/kg"
+
+        # simpan tanpa membulatkan—kita bulatkan saat tampil
+        results.append((nama, nilai, satuan))
+        st.markdown("---")
+
+    # tombol hitung
+    if st.button("🧮 Hitung Kadar", key="btn_kadar"):
+        st.markdown("## 📋 Hasil Perhitungan Kadar")
+        for nama, nilai, satuan in results:
+            st.success(f"📊 Kadar pada '{nama}' = **{nilai:.7f} {satuan}**")
+            
+# Fungsi RPD dengan styling yang diperbaiki
+def rpd():
+    st.markdown("""
+    <div class="header-container">
+        <h1>🔄 Perhitungan %RPD</h1>
+        <p class="header-subtitle">Evaluasi presisi dan kehandalan pengukuran duplikat melalui Relative Percent Difference</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Animasi lottie
+    lottie_url = "https://lottie.host/3404aaaa-4440-49d3-8015-a91ad8a5d529/hgcgSw6HUz.json"
+    lottie_json = load_lottieurl(lottie_url)
+    if lottie_json:
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st_lottie(lottie_json, height=200, key="anim_rpd")
+
+    # Info formula
+    st.markdown("""
+    <div class="info-section">
+        <h3>📐 Formula %RPD</h3>
+        <p style="text-align: center; font-size: 1.2rem; font-weight: 500;">
+            <code style="background: #ffc107; color: black; padding: 0.5rem 1rem; border-radius: 8px; font-size: 1.1rem;">
+            %RPD = |C1 - C2| / ((C1 + C2)/2) × 100%
+            </code>
+        </p>
+        <p style="text-align: center; margin-top: 1rem; color: #6c757d;">
+            Dimana: C1 dan C2 adalah hasil pengukuran duplikat
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Pilihan jenis perhitungan
+    tipe = st.radio("Pilih jenis perhitungan RPD:",
+                    ("A. Single RPD", "B. Multiple RPD"))
+
+    # Keterangan edukatif
+    col1, col2 = st.columns(2)
+    with col1:
+        st.info("✅ **Nilai %RPD < 5%** menunjukkan bahwa hasil pengukuran sangat konsisten dan reprodusibel, sehingga dapat dianggap andal dan diterima secara analitis.")
+    with col2:
+        st.warning("⚠️ **Nilai %RPD ≥ 5%** mengindikasikan adanya perbedaan yang cukup besar antara dua hasil pengukuran, sehingga menunjukkan kurangnya konsistensi atau kemungkinan adanya kesalahan dalam prosedur analisis.")
+
+    rpd_results = []
+
+    if tipe.startswith("A"):
+        # SINGLE RPD
+        st.markdown("""
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 1rem 0;">
+            <h4 style="color: #667eea; margin-bottom: 1rem;">📊 Input Data RPD</h4>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            c1 = st.number_input("Masukkan C1", min_value=0.0, value=0.0, step=0.0000001, format="%.7f", key="rpd_c1")
+        with col2:
+            c2 = st.number_input("Masukkan C2", min_value=0.0, value=0.0, step=0.0000001, format="%.7f", key="rpd_c2")
+
+        if st.button("🧮 Hitung %RPD", key="btn_rpd_single"):
+            num = abs(c1 - c2)
+            den = (c1 + c2) / 2 if (c1 + c2) != 0 else 1
+            rpd_val = num / den * 100
+
+            st.markdown("## 📋 Hasil Perhitungan %RPD")
+            st.success(f"📊 %RPD = **{rpd_val:.7f}%**")
+            
+            if rpd_val < 5:
+                st.info("✅ **Kesimpulan:** Hasil pengukuran konsisten dan dapat diterima.")
+            else:
+                st.warning("⚠️ **Kesimpulan:** Hasil pengukuran tidak konsisten atau kurang andal.")
+
+    else:
+        # MULTIPLE RPD
+        n = st.number_input("Jumlah perhitungan RPD (maks. 50)", min_value=1, max_value=50, value=1, step=1)
+        
+        for i in range(1, n + 1):
+            st.markdown(f"""
+            <div style="background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 1rem 0;">
+                <h4 style="color: #667eea; margin-bottom: 1rem;">📊 Perhitungan RPD #{i}</h4>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                c1 = st.number_input(f"C1 untuk RPD #{i}", min_value=0.0, value=0.0, step=0.0000001, format="%.7f", key=f"rpd_m_c1_{i}")
+            with col2:
+                c2 = st.number_input(f"C2 untuk RPD #{i}", min_value=0.0, value=0.0, step=0.0000001, format="%.7f", key=f"rpd_m_c2_{i}")
+
+            num = abs(c1 - c2)
+            den = (c1 + c2) / 2 if (c1 + c2) != 0 else 1
+            rpd_val = num / den * 100
+
+            rpd_results.append((i, rpd_val))
+            st.markdown("---")
+
+        if st.button("🧮 Hitung Semua RPD", key="btn_rpd_multiple"):
+            st.markdown("## 📋 Hasil Perhitungan %RPD")
+            all_consistent = True
+
+            for i, val in rpd_results:
+                st.write(f"🔹 **%RPD #{i}** = **{val:.7f}%**")
+                if val < 5:
+                    st.info(f"✅ RPD #{i} menunjukkan hasil konsisten")
+                else:
+                    st.warning(f"⚠️ RPD #{i} menunjukkan hasil tidak konsisten")
+                    all_consistent = False
+
+            # Kesimpulan akhir
+            st.markdown("---")
+            if all_consistent:
+                st.success("✅ **Kesimpulan Akhir:** Semua hasil perhitungan menunjukkan %RPD < 5%, sehingga dapat disimpulkan bahwa hasil analisis RPD konsisten dan dapat diterima.")
+            else:
+                st.error("❌ **Kesimpulan Akhir:** Terdapat hasil perhitungan dengan %RPD ≥ 5%, sehingga dapat disimpulkan bahwa analisis RPD tidak sepenuhnya konsisten.")
+
+# Fungsi REC dengan styling yang diperbaiki
+def rec():
+    st.markdown("""
+    <div class="header-container">
+        <h1>🎯 Perhitungan %Recovery</h1>
+        <p class="header-subtitle">Mengukur akurasi metode analisis melalui perhitungan persentase perolehan kembali analit</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Animasi lottie
+    lottie_url = "https://lottie.host/c23cbd35-6d04-490e-8a28-162d08f97c2e/dgvwoV7Ytb.json"
+    lottie_json = load_lottieurl(lottie_url)
+    if lottie_json:
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st_lottie(lottie_json, height=200, key="anim_rec")
+
+    # Info formula
+    st.markdown("""
+    <div class="info-section">
+        <h3>📐 Formula %Recovery</h3>
+        <p style="text-align: center; font-size: 1.2rem; font-weight: 500;">
+            <code style="background: #dc3545; color: white; padding: 0.5rem 1rem; border-radius: 8px; font-size: 1.1rem;">
+            %REC = (C3 - C1) / C2 × 100%
+            </code>
+        </p>
+        <p style="text-align: center; margin-top: 1rem; color: #6c757d;">
+            C1 = Konsentrasi sampel, C2 = Konsentrasi spike, C3 = Konsentrasi sampel + spike
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Pilihan jenis perhitungan
+    tipe = st.radio("Pilih jenis perhitungan Recovery:",
+                    ("A. Single REC", "B. Multiple REC"))
+
+    # Keterangan edukatif
+    col1, col2 = st.columns(2)
+    with col1:
+        st.info("✅ **Nilai %Recovery 80-120%** menunjukkan bahwa metode analisis memiliki akurasi yang baik, di mana jumlah analit yang terukur mendekati jumlah yang sebenarnya. Ini menandakan bahwa tidak ada kehilangan signifikan atau interferensi yang berarti selama proses analisis.")
+    with col2:
+        st.warning("⚠️ **Nilai %Recovery di luar 80-120%** mengindikasikan adanya ketidaksesuaian antara jumlah analit yang seharusnya dan yang terukur, sehingga menandakan akurasi yang buruk.")
+
+    rec_results = []
+
+    if tipe.startswith("A"):
+        # SINGLE REC
+        st.markdown("""
+        <div style="background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 1rem 0;">
+            <h4 style="color: #667eea; margin-bottom: 1rem;">📊 Input Data Recovery</h4>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            c1 = st.number_input("C1 (Konsentrasi sampel)", min_value=0.0, value=0.0, step=0.0000001, format="%.7f", key="rec_c1")
+        with col2:
+            c2 = st.number_input("C2 (Konsentrasi spike)", min_value=0.0, value=0.0, step=0.0000001, format="%.7f", key="rec_c2")
+        with col3:
+            c3 = st.number_input("C3 (Konsentrasi sampel+spike)", min_value=0.0, value=0.0, step=0.0000001, format="%.7f", key="rec_c3")
+
+        if st.button("🧮 Hitung %REC", key="btn_rec_single"):
+            den = c2 if c2 != 0 else 1
+            rec_val = (c3 - c1) / den * 100
+
+            st.markdown("## 📋 Hasil Perhitungan %Recovery")
+            st.success(f"📊 %REC = **{rec_val:.7f}%**")
+
+            if 80 <= rec_val <= 120:
+                st.info("✅ **Kesimpulan:** Hasil menunjukkan akurasi yang baik.")
+            else:
+                st.warning("⚠️ **Kesimpulan:** Hasil menunjukkan akurasi yang buruk atau ada gangguan dalam analisis.")
+
+    else:
+        # MULTIPLE REC
+        n = st.number_input("Jumlah perhitungan REC (maks. 50)", min_value=1, max_value=50, value=1, step=1)
+        
+        for i in range(1, n + 1):
+            st.markdown(f"""
+            <div style="background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin: 1rem 0;">
+                <h4 style="color: #667eea; margin-bottom: 1rem;">📊 Perhitungan REC #{i}</h4>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                c1 = st.number_input(f"C1 untuk REC #{i}", min_value=0.0, value=0.0, step=0.0000001, format="%.7f", key=f"rec_m_c1_{i}")
+            with col2:
+                c2 = st.number_input(f"C2 untuk REC #{i}", min_value=0.0, value=0.0, step=0.0000001, format="%.7f", key=f"rec_m_c2_{i}")
+            with col3:
+                c3 = st.number_input(f"C3 untuk REC #{i}", min_value=0.0, value=0.0, step=0.0000001, format="%.7f", key=f"rec_m_c3_{i}")
+
+            den = c2 if c2 != 0 else 1
+            rec_val = (c3 - c1) / den * 100
+
+            rec_results.append((i, rec_val))
+            st.markdown("---")
+
+        if st.button("🧮 Hitung Semua REC", key="btn_rec_multiple"):
+            st.markdown("## 📋 Hasil Perhitungan %Recovery")
+            all_accurate = True
+
+            for i, val in rec_results:
+                st.write(f"📊 **%REC #{i}** = **{val:.7f}%**")
+                if 80 <= val <= 120:
+                    st.info(f"✅ REC #{i} menunjukkan akurasi baik")
+                else:
+                    st.warning(f"⚠️ REC #{i} menunjukkan akurasi kurang baik")
+                    all_accurate = False
+
+            st.markdown("---")
+            # Kesimpulan akhir
+            if all_accurate:
+                st.success("✅ **Kesimpulan Akhir:** Semua hasil %Recovery berada dalam rentang 80–120%, artinya metode analisis memiliki akurasi yang baik.")
+            else:
+                st.error("❌ **Kesimpulan Akhir:** Terdapat hasil %Recovery di luar rentang 80–120%, menunjukkan adanya ketidakakuratan dalam analisis.")
+
+# --- Sidebar & Routing ---
+st.sidebar.markdown("""
+<div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; margin-bottom: 1rem;">
+    <h2 style="color: white; margin: 0;">🧪 Navigasi</h2>
+</div>
+""", unsafe_allow_html=True)
+
+page = st.sidebar.radio("Pilih Halaman:", ["🏠 Homepage", "📖 Tentang", "🔬 C Terukur", "📏 Kadar", "🔄 %RPD", "🎯 %REC"])
+
+if page == "🏠 Homepage":
+    homepage()
+elif page == "📖 Tentang":
+    tentang()
+elif page == "🔬 C Terukur":
+    c_terukur()
+elif page == "📏 Kadar":
+    kadar()
+elif page == "🔄 %RPD":
+    rpd()
+elif page == "🎯 %REC":
+    rec()
