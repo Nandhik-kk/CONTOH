@@ -5,12 +5,15 @@ import pandas as pd
 import numpy as np
 from PIL import Image
 
-# fungsi lottie
+# fungsi lottie dengan error handling
 def load_lottieurl(url: str):
-    r = requests.get(url)
-    if r.status_code != 200:
+    try:
+        r = requests.get(url, timeout=10)
+        if r.status_code != 200:
+            return None
+        return r.json()
+    except:
         return None
-    return r.json()
 
 # Custom CSS untuk styling yang lebih menarik
 def load_css():
@@ -249,11 +252,21 @@ def homepage():
         """, unsafe_allow_html=True)
     
     with col2:
-        st.image(
-            "https://lsi.fleischhacker-asia.biz/wp-content/uploads/2022/05/Spektrofotometer-UV-VIS-Fungsi-Prinsip-Kerja-dan-Cara-Kerjanya.jpg", 
-            caption="🖼️ Spektrofotometer UV-Vis (Sumber: PT. Laboratorium Solusi Indonesia)", 
-            use_container_width=True
-        )
+        try:
+            st.image(
+                "https://lsi.fleischhacker-asia.biz/wp-content/uploads/2022/05/Spektrofotometer-UV-VIS-Fungsi-Prinsip-Kerja-dan-Cara-Kerjanya.jpg", 
+                caption="🖼️ Spektrofotometer UV-Vis (Sumber: PT. Laboratorium Solusi Indonesia)", 
+                use_container_width=True
+            )
+        except:
+            # Fallback jika gambar tidak bisa dimuat
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                        padding: 3rem; border-radius: 15px; text-align: center; color: white;">
+                <h3>🔬 Spektrofotometer UV-Vis</h3>
+                <p>Instrumen untuk analisis absorbansi cahaya UV dan Visible</p>
+            </div>
+            """, unsafe_allow_html=True)
         
         # Tambahan info box
         st.info("💡 **Prinsip Kerja:** Cahaya melewati sampel, sebagian diserap molekul, dan intensitas cahaya yang diteruskan diukur untuk menentukan konsentrasi.")
@@ -296,7 +309,12 @@ def homepage():
     with col1:
         st.markdown('<div class="feature-card">', unsafe_allow_html=True)
         if lottie_kadar:
-            st_lottie(lottie_kadar, height=120, key="kadar")
+            try:
+                st_lottie(lottie_kadar, height=120, key="kadar")
+            except:
+                st.markdown("🔬", unsafe_allow_html=True)
+        else:
+            st.markdown("<div style='text-align: center; font-size: 4rem;'>📏</div>", unsafe_allow_html=True)
         st.markdown('<div class="feature-title">📏 Perhitungan C Terukur & Kadar</div>', unsafe_allow_html=True)
         st.markdown('<div class="feature-description">Menghitung konsentrasi terukur dan kadar senyawa berdasarkan nilai absorbansi menggunakan persamaan regresi linier kurva standar</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
@@ -304,7 +322,12 @@ def homepage():
     with col2:
         st.markdown('<div class="feature-card">', unsafe_allow_html=True)
         if lottie_rpd:
-            st_lottie(lottie_rpd, height=120, key="rpd")
+            try:
+                st_lottie(lottie_rpd, height=120, key="rpd")
+            except:
+                st.markdown("🔄", unsafe_allow_html=True)
+        else:
+            st.markdown("<div style='text-align: center; font-size: 4rem;'>🔄</div>", unsafe_allow_html=True)
         st.markdown('<div class="feature-title">🔄 Perhitungan %RPD</div>', unsafe_allow_html=True)
         st.markdown('<div class="feature-description">Evaluasi presisi dan kehandalan pengukuran duplikat dengan menghitung Relative Percent Difference untuk kontrol kualitas</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
@@ -312,7 +335,12 @@ def homepage():
     with col3:
         st.markdown('<div class="feature-card">', unsafe_allow_html=True)
         if lottie_rec:
-            st_lottie(lottie_rec, height=120, key="rec")
+            try:
+                st_lottie(lottie_rec, height=120, key="rec")
+            except:
+                st.markdown("🎯", unsafe_allow_html=True)
+        else:
+            st.markdown("<div style='text-align: center; font-size: 4rem;'>🎯</div>", unsafe_allow_html=True)
         st.markdown('<div class="feature-title">🎯 Perhitungan %Recovery</div>', unsafe_allow_html=True)
         st.markdown('<div class="feature-description">Mengukur akurasi metode analisis melalui perhitungan persentase perolehan kembali analit yang ditambahkan</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
@@ -508,13 +536,16 @@ def c_terukur():
     </div>
     """, unsafe_allow_html=True)
     
-    # Animasi Lottie
+    # Animasi Lottie dengan error handling
     lottie_url = "https://lottie.host/5ee6c7e7-3c7b-473f-b75c-df412fe210cc/kF9j77AAsG.json"
     lottie_json = load_lottieurl(lottie_url)
     if lottie_json:
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            st_lottie(lottie_json, height=200, key="anim_c_terukur")
+            try:
+                st_lottie(lottie_json, height=200, key="anim_c_terukur")
+            except:
+                st.markdown("<div style='text-align: center; font-size: 6rem;'>🔬</div>", unsafe_allow_html=True)
 
     # Info formula
     st.markdown("""
@@ -579,13 +610,16 @@ def kadar():
     </div>
     """, unsafe_allow_html=True)
 
-    # Animasi lottie
+    # Animasi lottie dengan error handling
     lottie_url = "https://lottie.host/765b6ca4-5e8a-4baf-b1f8-703bc83b6e12/eKBFeaUGKE.json"
     lottie_json = load_lottieurl(lottie_url)
     if lottie_json:
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            st_lottie(lottie_json, height=200, key="anim_kadar")
+            try:
+                st_lottie(lottie_json, height=200, key="anim_kadar")
+            except:
+                st.markdown("<div style='text-align: center; font-size: 6rem;'>📏</div>", unsafe_allow_html=True)
 
     # Pilih tipe perhitungan
     tipe = st.radio("Pilih jenis perhitungan:",
@@ -711,13 +745,16 @@ def rpd():
     </div>
     """, unsafe_allow_html=True)
 
-    # Animasi lottie
+    # Animasi lottie dengan error handling
     lottie_url = "https://lottie.host/3404aaaa-4440-49d3-8015-a91ad8a5d529/hgcgSw6HUz.json"
     lottie_json = load_lottieurl(lottie_url)
     if lottie_json:
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            st_lottie(lottie_json, height=200, key="anim_rpd")
+            try:
+                st_lottie(lottie_json, height=200, key="anim_rpd")
+            except:
+                st.markdown("<div style='text-align: center; font-size: 6rem;'>🔄</div>", unsafe_allow_html=True)
 
     # Info formula
     st.markdown("""
@@ -826,13 +863,16 @@ def rec():
     </div>
     """, unsafe_allow_html=True)
 
-    # Animasi lottie
+    # Animasi lottie dengan error handling
     lottie_url = "https://lottie.host/c23cbd35-6d04-490e-8a28-162d08f97c2e/dgvwoV7Ytb.json"
     lottie_json = load_lottieurl(lottie_url)
     if lottie_json:
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            st_lottie(lottie_json, height=200, key="anim_rec")
+            try:
+                st_lottie(lottie_json, height=200, key="anim_rec")
+            except:
+                st.markdown("<div style='text-align: center; font-size: 6rem;'>🎯</div>", unsafe_allow_html=True)
 
     # Info formula
     st.markdown("""
