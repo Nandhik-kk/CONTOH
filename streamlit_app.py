@@ -458,6 +458,7 @@ def tentang():
                 <h4 style="color: #28a745; margin-bottom: 0.5rem;">📊 Perhitungan Kadar</h4>
                 <p><strong>Tipe A:</strong> Tanpa bobot sampel (mg/L)</p>
                 <code style="background: #f8f9fa; padding: 0.3rem; border-radius: 4px;">Kadar = (C - Blanko) × FP</code>
+                <br><br>
                 <p><strong>Tipe B:</strong> Dengan bobot sampel (mg/kg)</p>
                 <code style="background: #f8f9fa; padding: 0.3rem; border-radius: 4px;">Kadar = (C × V) / W</code>
             </div>
@@ -466,7 +467,7 @@ def tentang():
                 <h4 style="color: #ffc107; margin-bottom: 0.5rem;">🔄 Perhitungan %RPD</h4>
                 <p>Relative Percent Difference untuk evaluasi presisi:</p>
                 <code style="background: #f8f9fa; padding: 0.3rem; border-radius: 4px;">%RPD = |C1-C2| / ((C1+C2)/2) × 100%</code>
-                <p style="margin-top: 0.5rem; font-size: 0.9rem;">Interpretasi otomatis: < 5% = konsisten</p>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem;">Interpretasi otomatis: &lt; 5% = konsisten</p>
             </div>
             
             <div class="principle-item">
